@@ -1,18 +1,12 @@
 package com.irnhakim.myapplication.ui.location;
-
-
-
-import com.irnhakim.myapplication.adapter.PlacesApiService;
-import com.irnhakim.myapplication.adapter.NearbyPlacesResponse;
-import com.irnhakim.myapplication.adapter.Place;
 import android.Manifest;
 import android.content.pm.PackageManager;
 import android.location.Location;
 import android.os.Bundle;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.core.app.ActivityCompat;
@@ -28,17 +22,13 @@ import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.SupportMapFragment;
 import com.google.android.gms.maps.model.LatLng;
-import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
 import com.irnhakim.myapplication.R;
+import com.google.android.gms.maps.model.MarkerOptions;
+import com.google.android.gms.maps.model.LatLng;
 
-import java.util.List;
 
-import retrofit2.Call;
-import retrofit2.Callback;
-import retrofit2.Response;
-import retrofit2.Retrofit;
-import retrofit2.converter.gson.GsonConverterFactory;
+import java.util.Random;
 
 public class LocationFragment extends Fragment {
 
@@ -53,6 +43,15 @@ public class LocationFragment extends Fragment {
     private LocationCallback locationCallback;
 
     private static final int REQUEST_LOCATION_PERMISSION = 1;
+
+    // Nama tempat dan koordinatnya
+    private static final String[] PLACE_NAMES = {
+            "Nasi soto ayam mamah Nayra",
+            "Republic Kebab Premium",
+            "RM Lamun Ombak",
+            "Cumi Bakar Rezeki",
+            "Seafood BomBom"
+    };
 
     @Nullable
     @Override
@@ -83,7 +82,7 @@ public class LocationFragment extends Fragment {
 
         LocationRequest locationRequest = LocationRequest.create();
         locationRequest.setPriority(LocationRequest.PRIORITY_HIGH_ACCURACY);
-        //locationRequest.setInterval(60000);
+        //locationRequest.setInterval(5000); // Update location every 5 seconds
 
         locationCallback = new LocationCallback() {
             @Override
@@ -92,78 +91,46 @@ public class LocationFragment extends Fragment {
                     return;
                 }
 
-                Location location = locationResult.getLastLocation();
-                LatLng currentLatLng = new LatLng(location.getLatitude(), location.getLongitude());
-                googleMap.moveCamera(CameraUpdateFactory.newLatLngZoom(currentLatLng, 15f));
-                String nama = "Current Location";
-                googleMap.addMarker(new MarkerOptions().position(currentLatLng).title(nama));
-                // Mencari restoran terdekat
-                findNearbyRestaurants(currentLatLng, googleMap);
+                for (Location location : locationResult.getLocations()) {
+                    LatLng currentLatLng = new LatLng(location.getLatitude(), location.getLongitude());
+                    googleMap.addMarker(new MarkerOptions().position(currentLatLng).title("Current Location"));
+
+                    // Add 5 random markers around the current location
+                    for (int i = 1; i <= 5; i++) {
+                        double radius = Math.random() * 980 + 20; // Random radius between 20m and 1km
+                        double angle = Math.random() * Math.PI * 2; // Random angle between 0 and 2pi
+                        double offsetX = radius * Math.cos(angle);
+                        double offsetY = radius * Math.sin(angle);
+
+                        LatLng markerLatLng = new LatLng(currentLatLng.latitude + offsetX / 111320, currentLatLng.longitude + offsetY / (111320 * Math.cos(currentLatLng.latitude)));
+
+                        String markerTitle = "";
+                        switch (i) {
+                            case 1:
+                                markerTitle = "Nasi Soto Ayam Mamah Nayra";
+                                break;
+                            case 2:
+                                markerTitle = "Republic Kebab Premium";
+                                break;
+                            case 3:
+                                markerTitle = "RM Lamun Ombak";
+                                break;
+                            case 4:
+                                markerTitle = "Cumi Bakar Rezeki";
+                                break;
+                            case 5:
+                                markerTitle = "Seafood BomBom";
+                                break;
+                        }
+
+                        googleMap.addMarker(new MarkerOptions().position(markerLatLng).title(markerTitle));
+                    }
+
+                    googleMap.moveCamera(CameraUpdateFactory.newLatLngZoom(currentLatLng, 15f));
+                }
             }
         };
 
         fusedLocationProviderClient.requestLocationUpdates(locationRequest, locationCallback, null);
-    }
-
-    private void findNearbyRestaurants(LatLng currentLatLng, GoogleMap googleMap) {
-        String apikey = "AIzaSyB9MxxJBmzLHdfsMEZSdV0vORR_MRwirPI";
-        String placesUrl = "https://maps.googleapis.com/maps/api/place/nearbysearch/json?location="+currentLatLng.latitude+","+currentLatLng.longitude+"&radius=1000&type=restaurant&key="+apikey;
-
-        Retrofit retrofit = new Retrofit.Builder()
-                .baseUrl("https://maps.googleapis.com/")
-                .addConverterFactory(GsonConverterFactory.create())
-                .build();
-
-        PlacesApiService placesApiService = retrofit.create(PlacesApiService.class);
-        Call<NearbyPlacesResponse> call = placesApiService.getNearbyPlaces(placesUrl);
-        call.enqueue(new Callback<NearbyPlacesResponse>() {
-            @Override
-            public void onResponse(Call<NearbyPlacesResponse> call, Response<NearbyPlacesResponse> response) {
-                if (response.isSuccessful()) {
-                    NearbyPlacesResponse nearbyPlacesResponse = response.body();
-                    if (nearbyPlacesResponse != null && nearbyPlacesResponse.getResults() != null) {
-                        List<Place> places = nearbyPlacesResponse.getResults();
-                        addMarkersForPlaces(places, googleMap);
-                    } else {
-                        // No valid results
-                        Log.e("API Response", "No valid results found.");
-                    }
-                } else {
-                    // Handle error response
-                    Log.e("API Response", "Error: " + response.code() + " - " + response.message());
-                }
-            }
-
-            @Override
-            public void onFailure(Call<NearbyPlacesResponse> call, Throwable t) {
-                // Handle failure
-                Log.e("API Request", "Request failed: " + t.getMessage());
-            }
-        });
-    }
-
-    private void addMarkersForPlaces(List<Place> places, GoogleMap googleMap) {
-        int maxMarkers = 100; // Jumlah maksimum marker yang ingin ditambahkan
-        int addedMarkers = 0; // Jumlah marker yang sudah ditambahkan
-
-        for (Place place : places) {
-            if (addedMarkers >= maxMarkers) {
-                break;
-            }
-
-            double lat = place.getGeometry().getLocation().getLat();
-            double lng = place.getGeometry().getLocation().getLng();
-            LatLng placeLatLng = new LatLng(lat, lng);
-            String placeName = place.getName();
-
-            MarkerOptions markerOptions = new MarkerOptions()
-                    .position(placeLatLng)
-                    .title(placeName);
-
-            googleMap.addMarker(new MarkerOptions()
-                    .position(placeLatLng)
-                    .title(placeName));
-            addedMarkers++;
-        }
     }
 }
