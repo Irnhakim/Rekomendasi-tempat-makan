@@ -23,17 +23,15 @@ import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.SupportMapFragment;
 import com.google.android.gms.maps.model.LatLng;
-import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
 import com.google.android.libraries.places.api.Places;
 import com.google.android.libraries.places.api.model.Place;
-import com.google.android.libraries.places.api.model.PlaceLikelihood;
 import com.google.android.libraries.places.api.net.FindCurrentPlaceRequest;
 import com.google.android.libraries.places.api.net.FindCurrentPlaceResponse;
 import com.google.android.libraries.places.api.net.PlacesClient;
 import com.irnhakim.myapplication.R;
+import com.google.android.libraries.places.api.model.PlaceLikelihood;
 
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
@@ -51,6 +49,7 @@ public class LocationFragment extends Fragment {
     private PlacesClient placesClient;
 
     private static final int REQUEST_LOCATION_PERMISSION = 1;
+    private static final List<Place.Field> PLACE_FIELDS = Arrays.asList(Place.Field.NAME, Place.Field.LAT_LNG);
 
     @Nullable
     @Override
@@ -92,52 +91,50 @@ public class LocationFragment extends Fragment {
                     return;
                 }
 
-                for (Location location : locationResult.getLocations()) {
-                    LatLng latLng = new LatLng(location.getLatitude(), location.getLongitude());
-                    googleMap.addMarker(new MarkerOptions().position(latLng).title("Current Location"));
-                    googleMap.moveCamera(CameraUpdateFactory.newLatLngZoom(latLng, 15f));
+                Location location = locationResult.getLastLocation();
+                LatLng currentLatLng = new LatLng(location.getLatitude(), location.getLongitude());
+                googleMap.moveCamera(CameraUpdateFactory.newLatLngZoom(currentLatLng, 15f));
+                String nama = "Curren Location";
+                googleMap.addMarker(new MarkerOptions(). position(currentLatLng). title(nama));
 
-                    findNearbyPlaces(location, googleMap);
-                }
+                findNearbyRestaurants(currentLatLng, googleMap);
             }
         };
 
         fusedLocationProviderClient.requestLocationUpdates(locationRequest, locationCallback, null);
     }
 
-    private void findNearbyPlaces(Location location, GoogleMap googleMap) {
-        List<Place.Field> placeFields = Arrays.asList(Place.Field.NAME, Place.Field.LAT_LNG);
-
-        FindCurrentPlaceRequest request = FindCurrentPlaceRequest.builder(placeFields).build();
-
+    private void findNearbyRestaurants(LatLng currentLatLng, GoogleMap googleMap) {
+        FindCurrentPlaceRequest request = FindCurrentPlaceRequest.builder(PLACE_FIELDS).build();
         placesClient.findCurrentPlace(request).addOnCompleteListener(task -> {
             if (task.isSuccessful()) {
                 FindCurrentPlaceResponse response = task.getResult();
-
                 if (response != null) {
-                    List<PlaceLikelihood> placeLikelihoods = response.getPlaceLikelihoods();
-                    List<Marker> markers = new ArrayList<>();
-
-                    for (int i = 0; i < Math.min(placeLikelihoods.size(), 5); i++) {
-                        PlaceLikelihood placeLikelihood = placeLikelihoods.get(i);
+                    for (PlaceLikelihood placeLikelihood : response.getPlaceLikelihoods()) {
                         Place place = placeLikelihood.getPlace();
                         LatLng placeLatLng = place.getLatLng();
-
                         if (placeLatLng != null) {
-                            Marker marker = googleMap.addMarker(new MarkerOptions()
+                            googleMap.addMarker(new MarkerOptions()
                                     .position(placeLatLng)
                                     .title(place.getName()));
-                            markers.add(marker);
                         }
                     }
+                }
+            } else {
+                Exception exception = task.getException();
+                if (exception != null) {
+                    // Handle error
                 }
             }
         });
     }
 
+
     @Override
     public void onDestroyView() {
         super.onDestroyView();
-        fusedLocationProviderClient.removeLocationUpdates(locationCallback);
+        if (fusedLocationProviderClient != null && locationCallback != null) {
+            fusedLocationProviderClient.removeLocationUpdates(locationCallback);
+        }
     }
 }
