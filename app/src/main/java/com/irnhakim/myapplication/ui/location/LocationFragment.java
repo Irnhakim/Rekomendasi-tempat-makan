@@ -22,20 +22,24 @@ import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.SupportMapFragment;
+import com.google.android.gms.maps.model.BitmapDescriptorFactory;
 import com.google.android.gms.maps.model.LatLng;
+import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
 import com.google.android.libraries.places.api.Places;
-import com.google.android.libraries.places.api.model.AutocompletePrediction;
 import com.google.android.libraries.places.api.model.Place;
-import com.google.android.libraries.places.api.model.RectangularBounds;
-import com.google.android.libraries.places.api.net.FetchPlaceRequest;
-import com.google.android.libraries.places.api.net.FetchPlaceResponse;
-import com.google.android.libraries.places.api.net.FindAutocompletePredictionsRequest;
-import com.google.android.libraries.places.api.net.FindAutocompletePredictionsResponse;
+import com.google.android.libraries.places.api.model.PlaceLikelihood;
+import com.google.android.libraries.places.api.net.FindCurrentPlaceRequest;
+import com.google.android.libraries.places.api.net.FindCurrentPlaceResponse;
 import com.google.android.libraries.places.api.net.PlacesClient;
 import com.irnhakim.myapplication.R;
+import com.google.android.libraries.places.api.model.Place;
+import com.google.android.libraries.places.api.model.PlaceLikelihood;
+import com.google.android.libraries.places.api.model.Place.Type;
+import com.google.android.libraries.places.api.net.FindCurrentPlaceRequest;
+import com.google.android.libraries.places.api.net.FindCurrentPlaceResponse;
+import com.google.android.libraries.places.api.net.PlacesClient;
 
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
@@ -45,7 +49,6 @@ public class LocationFragment extends Fragment {
         @Override
         public void onMapReady(GoogleMap googleMap) {
             getCurrentLocation(googleMap);
-            searchAndAddPlaces(googleMap);
         }
     };
 
@@ -69,8 +72,8 @@ public class LocationFragment extends Fragment {
         SupportMapFragment mapFragment =
                 (SupportMapFragment) getChildFragmentManager().findFragmentById(R.id.map);
         if (mapFragment != null) {
+            Places.initialize(requireContext(), "AIzaSyCRhWH3Wf5mHphAqc8GDR00acm_M-d8kmk");
             fusedLocationProviderClient = LocationServices.getFusedLocationProviderClient(requireContext());
-            Places.initialize(requireContext(), getString(R.string.google_maps_key));
             placesClient = Places.createClient(requireContext());
             mapFragment.getMapAsync(callback);
         }
@@ -97,8 +100,11 @@ public class LocationFragment extends Fragment {
 
                 for (Location location : locationResult.getLocations()) {
                     LatLng latLng = new LatLng(location.getLatitude(), location.getLongitude());
-                    googleMap.addMarker(new MarkerOptions().position(latLng).title("Current Location"));
+                    MarkerOptions markerOptions = new MarkerOptions().position(latLng).title("Current Location");
+                    Marker currentLocationMarker = googleMap.addMarker(markerOptions);
                     googleMap.moveCamera(CameraUpdateFactory.newLatLngZoom(latLng, 15f));
+
+                    findNearbyRestaurants(location, googleMap, currentLocationMarker);
                 }
             }
         };
@@ -106,62 +112,29 @@ public class LocationFragment extends Fragment {
         fusedLocationProviderClient.requestLocationUpdates(locationRequest, locationCallback, null);
     }
 
-    private void searchAndAddPlaces(GoogleMap googleMap) {
-        List<LatLng> places = getFavoritePlaces();
-
-        RectangularBounds bounds = RectangularBounds.newInstance(
-                new LatLng(-34.6, 151.6), // Southwest bound
-                new LatLng(-33.9, 151.9)  // Northeast bound
-        );
-
-        FindAutocompletePredictionsRequest predictionsRequest = FindAutocompletePredictionsRequest.builder()
-                .setLocationBias(bounds)
-                .setQuery("makan")
+    private void findNearbyRestaurants(Location location, GoogleMap googleMap, Marker currentLocationMarker) {
+        FindCurrentPlaceRequest request = FindCurrentPlaceRequest.builder(Arrays.asList(Place.Field.NAME, Place.Field.TYPES))
                 .build();
 
-        placesClient.findAutocompletePredictions(predictionsRequest).addOnSuccessListener((response) -> {
-            for (AutocompletePrediction prediction : response.getAutocompletePredictions()) {
-                String placeId = prediction.getPlaceId();
-                FetchPlaceRequest placeRequest = FetchPlaceRequest.builder(placeId, Arrays.asList(Place.Field.LAT_LNG, Place.Field.NAME)).build();
-                placesClient.fetchPlace(placeRequest).addOnSuccessListener((fetchPlaceResponse) -> {
-                    Place place = fetchPlaceResponse.getPlace();
-                    LatLng latLng = place.getLatLng();
-                    googleMap.addMarker(new MarkerOptions().position(latLng).title(place.getName()));
-                });
+        placesClient.findCurrentPlace(request).addOnCompleteListener(task -> {
+            if (task.isSuccessful()) {
+                FindCurrentPlaceResponse response = task.getResult();
+                if (response != null) {
+                    List<PlaceLikelihood> placeLikelihoods = response.getPlaceLikelihoods();
+                    for (PlaceLikelihood placeLikelihood : placeLikelihoods) {
+                        Place place = placeLikelihood.getPlace();
+                        LatLng placeLatLng = place.getLatLng();
+                        MarkerOptions makan = new MarkerOptions()
+                                .position(placeLatLng)
+                                .title(place.getName());
+                        List<Place.Type> placeTypes = place.getTypes();
+                        if (placeTypes.contains(Type.RESTAURANT ) || placeTypes.contains(Type.FOOD ) || placeTypes.contains(Type.CAFE) || placeTypes.contains(Type.ESTABLISHMENT )) {
+                            makan.icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_ORANGE));
+                        }
+                        googleMap.addMarker(makan);
+                    }
+                }
             }
-        }).addOnFailureListener((exception) -> {
-            // Handle error
         });
     }
-
-    private List<LatLng> getFavoritePlaces() {
-        List<LatLng> places = new ArrayList<>();
-
-        // Tempat Makan Favorit 1
-        places.add(new LatLng(-34.1, 151.1));
-
-        // Tempat Makan Favorit 2
-        places.add(new LatLng(-34.2, 151.2));
-
-        // Tempat Makan Favorit 3
-        places.add(new LatLng(-34.3, 151.3));
-
-        // Tempat Makan Favorit 4
-        places.add(new LatLng(-34.4, 151.4));
-
-        // Tempat Makan Favorit 5
-        places.add(new LatLng(-34.5, 151.5));
-
-        return places;
-    }
-
-    @Override
-    public void onDestroy() {
-        super.onDestroy();
-
-        if (fusedLocationProviderClient != null && locationCallback != null) {
-            fusedLocationProviderClient.removeLocationUpdates(locationCallback);
-        }
-    }
 }
-
