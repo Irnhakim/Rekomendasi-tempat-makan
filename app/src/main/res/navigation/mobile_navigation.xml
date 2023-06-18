@@ -3,23 +3,25 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:id="@+id/mobile_navigation"
-    app:startDestination="@+id/navigation_home">
+    app:startDestination="@+id/info">
 
     <fragment
-        android:id="@+id/navigation_home"
-        android:name="com.irnhakim.myapplication.ui.home.HomeFragment"
-        android:label="@string/title_home"
-        tools:layout="@layout/fragment_home" />
+        android:id="@+id/info"
+        android:name="com.irnhakim.myapplication.ui.info.InfoFragment"
+        android:label="@string/title_info"
+        tools:layout="@layout/fragment_info"/>
 
     <fragment
-        android:id="@+id/navigation_dashboard"
-        android:name="com.irnhakim.myapplication.ui.dashboard.DashboardFragment"
-        android:label="@string/title_dashboard"
-        tools:layout="@layout/fragment_dashboard" />
+        android:id="@+id/location"
+        android:name="com.irnhakim.myapplication.ui.location.LocationFragment"
+        android:label="@string/title_location"
+        tools:layout="@layout/fragment_location"/>
 
     <fragment
-        android:id="@+id/navigation_notifications"
-        android:name="com.irnhakim.myapplication.ui.notifications.NotificationsFragment"
-        android:label="@string/title_notifications"
-        tools:layout="@layout/fragment_notifications" />
+        android:id="@+id/profile"
+        android:name="com.irnhakim.myapplication.ui.profile.ProfileFragment"
+        android:label="@string/title_profile"
+        tools:layout="@layout/fragment_profile"/>
+
+
 </navigation>

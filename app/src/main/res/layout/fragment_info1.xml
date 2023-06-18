@@ -1,0 +1,69 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    tools:context=".ui.info.InfoFragment1">
+    <TextView
+        android:id="@+id/txtJudul"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="INFORMASI APLIKASI"
+        android:textAlignment="center"
+        android:textStyle="bold"
+        android:layout_marginTop="20dp"
+        android:textSize="24dp"/>
+    <ImageView
+        android:id="@+id/logo"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:src="@drawable/ic_launcher_foreground"
+        android:layout_below="@+id/txtJudul"
+        android:layout_centerHorizontal="true"
+        android:layout_marginTop="20dp"/>
+    <TextView
+        android:id="@+id/txtinfo1"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Mau buku catatan yang mudah digunakan untuk mencatat cepat?"
+        android:layout_below="@+id/logo"
+        android:textAlignment="textStart"/>
+    <TextView
+        android:id="@+id/txtinfo2"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Mau notes praktis untuk membuat daftar tugas, daftar belanja dengan pengingat?"
+        android:layout_below="@+id/txtinfo1"
+        android:textAlignment="textStart"/>
+    <TextView
+        android:id="@+id/txtinfo3"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Aplikasi pencatat, buku catatan, dan notes gratis ini memenuhi segala kebutuhan Anda. Tanpa iklan!"
+        android:layout_below="@+id/txtinfo2"
+        android:textAlignment="textStart"/>
+    <TextView
+        android:id="@+id/txtinfo4"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text=" Notes, Catatan, Daftar - RyuNote adalah aplikasi catatan keren untuk android. dengan RyuNoteAnda dapat menulis  catatan dengan mudah,cepat, dan aman. Tulis catatan seperti menggunakan pena dan kertas"
+        android:layout_below="@+id/txtinfo3"
+        android:paddingTop="10dp"
+        android:textAlignment="textStart"/>
+    <TextView
+        android:id="@+id/txtinfo5"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text=" - 10120143 Ihsan Ramadhan-"
+        android:layout_below="@+id/txtinfo4"
+        android:paddingTop="20dp"
+        android:textAlignment="center"/>
+    <TextView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Swipe untuk ke halaman selanjutnya >>"
+        android:layout_alignParentBottom="true"
+        android:textAlignment="center"
+        android:layout_centerInParent="true"/>
+
+</RelativeLayout>
