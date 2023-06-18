@@ -25,12 +25,17 @@ import com.google.android.gms.maps.SupportMapFragment;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.MarkerOptions;
 import com.google.android.libraries.places.api.Places;
-import com.google.android.libraries.places.api.model.LocationBias;
+import com.google.android.libraries.places.api.model.AutocompletePrediction;
 import com.google.android.libraries.places.api.model.Place;
-import com.google.android.libraries.places.api.net.FindCurrentPlaceRequest;
+import com.google.android.libraries.places.api.model.RectangularBounds;
+import com.google.android.libraries.places.api.net.FetchPlaceRequest;
+import com.google.android.libraries.places.api.net.FetchPlaceResponse;
+import com.google.android.libraries.places.api.net.FindAutocompletePredictionsRequest;
+import com.google.android.libraries.places.api.net.FindAutocompletePredictionsResponse;
 import com.google.android.libraries.places.api.net.PlacesClient;
 import com.irnhakim.myapplication.R;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
@@ -40,7 +45,7 @@ public class LocationFragment extends Fragment {
         @Override
         public void onMapReady(GoogleMap googleMap) {
             getCurrentLocation(googleMap);
-            searchAndAddMarkers(googleMap);
+            searchAndAddPlaces(googleMap);
         }
     };
 
@@ -101,41 +106,53 @@ public class LocationFragment extends Fragment {
         fusedLocationProviderClient.requestLocationUpdates(locationRequest, locationCallback, null);
     }
 
-    private void searchAndAddMarkers(GoogleMap googleMap) {
-        String keyword = "makan";
-        double radius = 500; // Radius pencarian dalam meter
+    private void searchAndAddPlaces(GoogleMap googleMap) {
+        List<LatLng> places = getFavoritePlaces();
 
-        if (ActivityCompat.checkSelfPermission(requireContext(), Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
-            requestPermissions(new String[]{Manifest.permission.ACCESS_FINE_LOCATION}, REQUEST_LOCATION_PERMISSION);
-            return;
-        }
+        RectangularBounds bounds = RectangularBounds.newInstance(
+                new LatLng(-34.6, 151.6), // Southwest bound
+                new LatLng(-33.9, 151.9)  // Northeast bound
+        );
 
-        fusedLocationProviderClient.getLastLocation().addOnSuccessListener(location -> {
-            if (location != null) {
-                LatLng latLng = new LatLng(location.getLatitude(), location.getLongitude());
+        FindAutocompletePredictionsRequest predictionsRequest = FindAutocompletePredictionsRequest.builder()
+                .setLocationBias(bounds)
+                .setQuery("makan")
+                .build();
 
-                // Buat permintaan pencarian tempat menggunakan kata kunci dan radius
-                List<Place.Field> placeFields = Arrays.asList(Place.Field.ID, Place.Field.NAME, Place.Field.LAT_LNG);
-                FindCurrentPlaceRequest request =
-                        FindCurrentPlaceRequest.newInstance(placeFields);
-                request.setKeywords(Arrays.asList(keyword));
-                request.setLocationBias(LocationBias.newBuilder()
-                        .setLatLng(latLng)
-                        .setRadius(radius)
-                        .build());
-
-                // Lakukan pencarian tempat
-                placesClient.findCurrentPlace(request).addOnSuccessListener((response) -> {
-                    for (PlaceLikelihood placeLikelihood : response.getPlaceLikelihoods()) {
-                        Place place = placeLikelihood.getPlace();
-                        LatLng placeLatLng = place.getLatLng();
-                        if (placeLatLng != null) {
-                            googleMap.addMarker(new MarkerOptions().position(placeLatLng).title(place.getName()));
-                        }
-                    }
+        placesClient.findAutocompletePredictions(predictionsRequest).addOnSuccessListener((response) -> {
+            for (AutocompletePrediction prediction : response.getAutocompletePredictions()) {
+                String placeId = prediction.getPlaceId();
+                FetchPlaceRequest placeRequest = FetchPlaceRequest.builder(placeId, Arrays.asList(Place.Field.LAT_LNG, Place.Field.NAME)).build();
+                placesClient.fetchPlace(placeRequest).addOnSuccessListener((fetchPlaceResponse) -> {
+                    Place place = fetchPlaceResponse.getPlace();
+                    LatLng latLng = place.getLatLng();
+                    googleMap.addMarker(new MarkerOptions().position(latLng).title(place.getName()));
                 });
             }
+        }).addOnFailureListener((exception) -> {
+            // Handle error
         });
+    }
+
+    private List<LatLng> getFavoritePlaces() {
+        List<LatLng> places = new ArrayList<>();
+
+        // Tempat Makan Favorit 1
+        places.add(new LatLng(-34.1, 151.1));
+
+        // Tempat Makan Favorit 2
+        places.add(new LatLng(-34.2, 151.2));
+
+        // Tempat Makan Favorit 3
+        places.add(new LatLng(-34.3, 151.3));
+
+        // Tempat Makan Favorit 4
+        places.add(new LatLng(-34.4, 151.4));
+
+        // Tempat Makan Favorit 5
+        places.add(new LatLng(-34.5, 151.5));
+
+        return places;
     }
 
     @Override
@@ -147,3 +164,4 @@ public class LocationFragment extends Fragment {
         }
     }
 }
+
