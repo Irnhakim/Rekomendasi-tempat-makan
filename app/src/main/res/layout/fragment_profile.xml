@@ -1,14 +1,61 @@
 <?xml version="1.0" encoding="utf-8"?>
 <FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     tools:context=".ui.profile.ProfileFragment">
 
-    <!-- TODO: Update blank fragment layout -->
-    <TextView
+    <RelativeLayout
         android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:text="@string/hello_blank_fragment" />
+        android:layout_height="match_parent">
+
+        <ImageView
+            android:id="@+id/fotoProfile"
+            android:layout_width="342dp"
+            android:layout_height="385dp"
+            android:layout_centerHorizontal="true"
+            app:srcCompat="@drawable/profile" />
+
+        <TextView
+            android:id="@+id/txtNama"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Ihsan Ramadhan Nul Hakim"
+            android:layout_centerHorizontal="true"
+            android:layout_below="@+id/fotoProfile"
+            android:paddingTop="10dp"/>
+
+        <TextView
+            android:id="@+id/txtNim"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="10120143"
+            android:layout_below="@+id/txtNama"
+            android:layout_centerHorizontal="true"
+            android:paddingTop="10dp"/>
+
+        <TextView
+            android:id="@+id/txtKelas"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="IF-4"
+            android:layout_below="@+id/txtNim"
+            android:layout_centerHorizontal="true"
+            android:paddingTop="10dp"/>
+
+        <TextView
+            android:id="@+id/txtEmail"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:autoLink="email"
+            android:text="shanun036@gmail.com"
+            android:layout_below="@id/txtKelas"
+            android:layout_centerHorizontal="true"
+            android:paddingTop="10dp"/>
+
+
+    </RelativeLayout>
+
 
 </FrameLayout>

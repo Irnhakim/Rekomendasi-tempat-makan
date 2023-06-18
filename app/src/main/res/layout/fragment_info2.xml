@@ -14,19 +14,20 @@
         android:textStyle="bold"
         android:layout_marginTop="20dp"
         android:textSize="24dp"/>
+
     <ImageView
         android:id="@+id/logo"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:src="@drawable/ic_launcher_background"
+        android:layout_width="283dp"
+        android:layout_height="480dp"
         android:layout_below="@+id/txtJudul"
         android:layout_centerHorizontal="true"
-        android:layout_marginTop="20dp"/>
+        android:layout_marginTop="20dp"
+        android:src="@drawable/logo" />
     <TextView
         android:id="@+id/txtinfo1"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text=" App Name : RyuNote"
+        android:text="App Name : Where Am I ?"
         android:layout_below="@+id/logo"/>
     <TextView
         android:id="@+id/txtinfo2"

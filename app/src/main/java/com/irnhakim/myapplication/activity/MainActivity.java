@@ -21,7 +21,7 @@ import com.irnhakim.myapplication.ui.location.LocationFragment;
 import com.irnhakim.myapplication.ui.profile.ProfileFragment;
 
 public class MainActivity extends AppCompatActivity {
-    private ActivityMainBinding binding;
+
     private BottomNavigationView bottomNavigationView;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
