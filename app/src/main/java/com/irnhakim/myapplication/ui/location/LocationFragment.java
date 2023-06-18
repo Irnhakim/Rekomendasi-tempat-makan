@@ -24,16 +24,9 @@ import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.SupportMapFragment;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.MarkerOptions;
-import com.google.android.libraries.places.api.Places;
-import com.google.android.libraries.places.api.model.Place;
-import com.google.android.libraries.places.api.net.FindCurrentPlaceRequest;
-import com.google.android.libraries.places.api.net.FindCurrentPlaceResponse;
-import com.google.android.libraries.places.api.net.PlacesClient;
 import com.irnhakim.myapplication.R;
-import com.google.android.libraries.places.api.model.PlaceLikelihood;
 
-import java.util.Arrays;
-import java.util.List;
+import java.util.Random;
 
 public class LocationFragment extends Fragment {
 
@@ -46,10 +39,17 @@ public class LocationFragment extends Fragment {
 
     private FusedLocationProviderClient fusedLocationProviderClient;
     private LocationCallback locationCallback;
-    private PlacesClient placesClient;
 
     private static final int REQUEST_LOCATION_PERMISSION = 1;
-    private static final List<Place.Field> PLACE_FIELDS = Arrays.asList(Place.Field.NAME, Place.Field.LAT_LNG);
+
+    // Nama tempat dan koordinatnya
+    private static final String[] PLACE_NAMES = {
+            "Nasi soto ayam mamah Nayra",
+            "Republic Kebab Premium",
+            "RM Lamun Ombak",
+            "Cumi Bakar Rezeki",
+            "Seafood BomBom"
+    };
 
     @Nullable
     @Override
@@ -66,8 +66,6 @@ public class LocationFragment extends Fragment {
                 (SupportMapFragment) getChildFragmentManager().findFragmentById(R.id.map);
         if (mapFragment != null) {
             fusedLocationProviderClient = LocationServices.getFusedLocationProviderClient(requireContext());
-            Places.initialize(requireContext(), getString(R.string.google_maps_key));
-            placesClient = Places.createClient(requireContext());
             mapFragment.getMapAsync(callback);
         }
     }
@@ -82,7 +80,7 @@ public class LocationFragment extends Fragment {
 
         LocationRequest locationRequest = LocationRequest.create();
         locationRequest.setPriority(LocationRequest.PRIORITY_HIGH_ACCURACY);
-        locationRequest.setInterval(5000); // Update location every 5 seconds
+        //locationRequest.setInterval(5000); // Update location every 5 seconds
 
         locationCallback = new LocationCallback() {
             @Override
@@ -91,50 +89,46 @@ public class LocationFragment extends Fragment {
                     return;
                 }
 
-                Location location = locationResult.getLastLocation();
-                LatLng currentLatLng = new LatLng(location.getLatitude(), location.getLongitude());
-                googleMap.moveCamera(CameraUpdateFactory.newLatLngZoom(currentLatLng, 15f));
-                String nama = "Curren Location";
-                googleMap.addMarker(new MarkerOptions(). position(currentLatLng). title(nama));
+                for (Location location : locationResult.getLocations()) {
+                    LatLng currentLatLng = new LatLng(location.getLatitude(), location.getLongitude());
+                    googleMap.addMarker(new MarkerOptions().position(currentLatLng).title("Current Location"));
 
-                findNearbyRestaurants(currentLatLng, googleMap);
+                    // Add 5 random markers around the current location
+                    for (int i = 1; i <= 5; i++) {
+                        double radius = Math.random() * 980 + 20; // Random radius between 20m and 1km
+                        double angle = Math.random() * Math.PI * 2; // Random angle between 0 and 2pi
+                        double offsetX = radius * Math.cos(angle);
+                        double offsetY = radius * Math.sin(angle);
+
+                        LatLng markerLatLng = new LatLng(currentLatLng.latitude + offsetX / 111320, currentLatLng.longitude + offsetY / (111320 * Math.cos(currentLatLng.latitude)));
+
+                        String markerTitle = "";
+                        switch (i) {
+                            case 1:
+                                markerTitle = "Nasi Soto Ayam Mamah Nayra";
+                                break;
+                            case 2:
+                                markerTitle = "Republic Kebab Premium";
+                                break;
+                            case 3:
+                                markerTitle = "RM Lamun Ombak";
+                                break;
+                            case 4:
+                                markerTitle = "Cumi Bakar Rezeki";
+                                break;
+                            case 5:
+                                markerTitle = "Seafood BomBom";
+                                break;
+                        }
+
+                        googleMap.addMarker(new MarkerOptions().position(markerLatLng).title(markerTitle));
+                    }
+
+                    googleMap.moveCamera(CameraUpdateFactory.newLatLngZoom(currentLatLng, 15f));
+                }
             }
         };
 
         fusedLocationProviderClient.requestLocationUpdates(locationRequest, locationCallback, null);
-    }
-
-    private void findNearbyRestaurants(LatLng currentLatLng, GoogleMap googleMap) {
-        FindCurrentPlaceRequest request = FindCurrentPlaceRequest.builder(PLACE_FIELDS).build();
-        placesClient.findCurrentPlace(request).addOnCompleteListener(task -> {
-            if (task.isSuccessful()) {
-                FindCurrentPlaceResponse response = task.getResult();
-                if (response != null) {
-                    for (PlaceLikelihood placeLikelihood : response.getPlaceLikelihoods()) {
-                        Place place = placeLikelihood.getPlace();
-                        LatLng placeLatLng = place.getLatLng();
-                        if (placeLatLng != null) {
-                            googleMap.addMarker(new MarkerOptions()
-                                    .position(placeLatLng)
-                                    .title(place.getName()));
-                        }
-                    }
-                }
-            } else {
-                Exception exception = task.getException();
-                if (exception != null) {
-                    // Handle error
-                }
-            }
-        });
-    }
-
-
-    @Override
-    public void onDestroyView() {
-        super.onDestroyView();
-        if (fusedLocationProviderClient != null && locationCallback != null) {
-            fusedLocationProviderClient.removeLocationUpdates(locationCallback);
-        }
     }
 }
