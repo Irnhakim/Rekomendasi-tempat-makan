@@ -1,6 +1,5 @@
 package com.irnhakim.myapplication.ui.info;
 
-import android.annotation.SuppressLint;
 import android.os.Bundle;
 
 import androidx.annotation.NonNull;

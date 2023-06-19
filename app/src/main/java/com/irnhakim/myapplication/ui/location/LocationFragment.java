@@ -22,13 +22,12 @@ import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.SupportMapFragment;
 import com.google.android.gms.maps.model.LatLng;
+import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
 import com.irnhakim.myapplication.R;
-import com.google.android.gms.maps.model.MarkerOptions;
-import com.google.android.gms.maps.model.LatLng;
 
-
-import java.util.Random;
+import java.util.ArrayList;
+import java.util.List;
 
 public class LocationFragment extends Fragment {
 
@@ -41,17 +40,9 @@ public class LocationFragment extends Fragment {
 
     private FusedLocationProviderClient fusedLocationProviderClient;
     private LocationCallback locationCallback;
+    private List<MarkerOptions> markerOptionsList;
 
     private static final int REQUEST_LOCATION_PERMISSION = 1;
-
-    // Nama tempat dan koordinatnya
-    private static final String[] PLACE_NAMES = {
-            "Nasi soto ayam mamah Nayra",
-            "Republic Kebab Premium",
-            "RM Lamun Ombak",
-            "Cumi Bakar Rezeki",
-            "Seafood BomBom"
-    };
 
     @Nullable
     @Override
@@ -92,45 +83,33 @@ public class LocationFragment extends Fragment {
                 }
 
                 for (Location location : locationResult.getLocations()) {
-                    LatLng currentLatLng = new LatLng(location.getLatitude(), location.getLongitude());
-                    googleMap.addMarker(new MarkerOptions().position(currentLatLng).title("Current Location"));
-
-                    // Add 5 random markers around the current location
-                    for (int i = 1; i <= 5; i++) {
-                        double radius = Math.random() * 980 + 20; // Random radius between 20m and 1km
-                        double angle = Math.random() * Math.PI * 2; // Random angle between 0 and 2pi
-                        double offsetX = radius * Math.cos(angle);
-                        double offsetY = radius * Math.sin(angle);
-
-                        LatLng markerLatLng = new LatLng(currentLatLng.latitude + offsetX / 111320, currentLatLng.longitude + offsetY / (111320 * Math.cos(currentLatLng.latitude)));
-
-                        String markerTitle = "";
-                        switch (i) {
-                            case 1:
-                                markerTitle = "Nasi Soto Ayam Mamah Nayra";
-                                break;
-                            case 2:
-                                markerTitle = "Republic Kebab Premium";
-                                break;
-                            case 3:
-                                markerTitle = "RM Lamun Ombak";
-                                break;
-                            case 4:
-                                markerTitle = "Cumi Bakar Rezeki";
-                                break;
-                            case 5:
-                                markerTitle = "Seafood BomBom";
-                                break;
-                        }
-
-                        googleMap.addMarker(new MarkerOptions().position(markerLatLng).title(markerTitle));
-                    }
-
-                    googleMap.moveCamera(CameraUpdateFactory.newLatLngZoom(currentLatLng, 15f));
+                    LatLng latLng = new LatLng(location.getLatitude(), location.getLongitude());
+                    googleMap.addMarker(new MarkerOptions().position(latLng).title("Current Location"));
+                    googleMap.moveCamera(CameraUpdateFactory.newLatLngZoom(latLng, 13));
                 }
             }
         };
 
+        // Add custom markers with coordinates and labels
+        markerOptionsList = new ArrayList<>();
+        markerOptionsList.add(new MarkerOptions().position(new LatLng(-6.8965691,107.6308091)).title("Warung Nasi Bakar Jalaprang (Langganan tiap malam)"));
+        markerOptionsList.add(new MarkerOptions().position(new LatLng(-6.8945756,107.6420818)).title("Ayam Geprek Janda (Hari Jumat 6K udah sama nasi)"));
+        markerOptionsList.add(new MarkerOptions().position(new LatLng(-6.8760576,107.6087749)).title("Wizzmie Sukajadi (Rice bowlnya yang enak)"));
+        markerOptionsList.add(new MarkerOptions().position(new LatLng(-6.8886267,107.6192128)).title("Waroenk Babeh (Bisa Ngutang kalau akhir bulan)"));
+        markerOptionsList.add(new MarkerOptions().position(new LatLng(-6.9204046,107.6105683)).title("OTW SUSHI (Murah kalo bareng sama temen)"));
+
+        for (MarkerOptions markerOptions : markerOptionsList) {
+            googleMap.addMarker(markerOptions);
+        }
+
         fusedLocationProviderClient.requestLocationUpdates(locationRequest, locationCallback, null);
+    }
+
+    @Override
+    public void onDestroyView() {
+        super.onDestroyView();
+        if (fusedLocationProviderClient != null && locationCallback != null) {
+            fusedLocationProviderClient.removeLocationUpdates(locationCallback);
+        }
     }
 }
