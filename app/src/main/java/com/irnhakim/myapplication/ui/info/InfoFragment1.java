@@ -11,10 +11,11 @@ import android.view.ViewGroup;
 import com.irnhakim.myapplication.R;
 
 /**
- * A simple {@link Fragment} subclass.
- * Use the {@link InfoFragment1#newInstance} factory method to
- * create an instance of this fragment.
+ * NIM      : 10121043
+ * Nama     : Ihsan Ramadhan Nul Hakim
+ * Kelas    : IF-4
  */
+
 public class InfoFragment1 extends Fragment {
 
     // TODO: Rename parameter arguments, choose names that match

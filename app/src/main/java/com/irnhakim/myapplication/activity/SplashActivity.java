@@ -1,13 +1,17 @@
 package com.irnhakim.myapplication.activity;
 
-import androidx.appcompat.app.AppCompatActivity;
 
+import androidx.appcompat.app.AppCompatActivity;
 import android.content.Intent;
 import android.os.Bundle;
 import android.os.Handler;
-
 import com.irnhakim.myapplication.R;
 
+/**
+ * NIM      : 10121043
+ * Nama     : Ihsan Ramadhan Nul Hakim
+ * Kelas    : IF-4
+ */
 public class SplashActivity extends AppCompatActivity {
 
     @Override

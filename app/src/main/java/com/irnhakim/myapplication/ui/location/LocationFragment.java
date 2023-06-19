@@ -29,6 +29,11 @@ import com.irnhakim.myapplication.R;
 import java.util.ArrayList;
 import java.util.List;
 
+/**
+ * NIM      : 10121043
+ * Nama     : Ihsan Ramadhan Nul Hakim
+ * Kelas    : IF-4
+ */
 public class LocationFragment extends Fragment {
 
     private OnMapReadyCallback callback = new OnMapReadyCallback() {

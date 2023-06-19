@@ -19,6 +19,11 @@ import com.irnhakim.myapplication.adapter.InfoFragmentAdapter;
 import java.util.ArrayList;
 import java.util.List;
 
+/**
+ * NIM      : 10121043
+ * Nama     : Ihsan Ramadhan Nul Hakim
+ * Kelas    : IF-4
+ */
 
 public class InfoFragment extends Fragment {
     private ViewPager viewPager;

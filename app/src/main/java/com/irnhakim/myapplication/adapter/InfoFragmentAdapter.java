@@ -7,6 +7,12 @@ import androidx.fragment.app.FragmentStatePagerAdapter;
 
 import java.util.List;
 
+/**
+ * NIM      : 10121043
+ * Nama     : Ihsan Ramadhan Nul Hakim
+ * Kelas    : IF-4
+ */
+
 public class InfoFragmentAdapter extends FragmentStatePagerAdapter{
     private List<Fragment> fragmentList;
     public InfoFragmentAdapter(@NonNull FragmentManager fm, List<Fragment> fragmentList) {

@@ -20,6 +20,12 @@ import com.irnhakim.myapplication.ui.info.InfoFragment;
 import com.irnhakim.myapplication.ui.location.LocationFragment;
 import com.irnhakim.myapplication.ui.profile.ProfileFragment;
 
+/**
+ * NIM      : 10121043
+ * Nama     : Ihsan Ramadhan Nul Hakim
+ * Kelas    : IF-4
+ */
+
 public class MainActivity extends AppCompatActivity {
 
     private BottomNavigationView bottomNavigationView;
