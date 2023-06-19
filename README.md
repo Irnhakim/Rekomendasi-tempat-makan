@@ -5,5 +5,5 @@ Ihsan Ramadhan Nul Hakim
 IF-4
 
 ## Screenshot
-<img src="/assets/InfoPage1.png" alt="InfoPage1" width="200" height="400">
-<img src="/assets/CurrentLocation.png" alt="CurrentLocation" width="200" height="400">
+<img src="/assets/InfoPage1.png" alt="InfoPage1" width="25%">
+<img src="/assets/CurrentLocation.png" alt="CurrentLocation" width="25%">
